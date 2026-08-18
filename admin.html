@@ -418,7 +418,26 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 // ====== ضع بيانات مشروعك في Firebase هنا (نفس الإعدادات يجب استخدامها في index.html) ======
-const firebaseConfig = {
+// === كود مفتاح ImgBB ودالة الرفع ===
+const imgbbApiKey = "d7c956d3580e1a868961e9ef492d9c60";
+
+async function uploadImageToImgBB(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        return data.success ? data.data.url : null;
+    } catch (err) {
+        console.error("خطأ في رفع الصورة:", err);
+        return null;
+    }
+}
+
+  const firebaseConfig = {
   apiKey: "AIzaSyB7O7xrjJVgeslAGYoCZYnKqWG5s--FdkI",
   authDomain: "choes-7f98c.firebaseapp.com",
   projectId: "choes-7f98c",
