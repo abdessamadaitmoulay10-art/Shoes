@@ -631,6 +631,181 @@
 
   // PRODUCTS LISTEN
   function listenToProducts() {
+<!-- Firebase & Application Scripts -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { 
+    getAuth, 
+    signInWithEmailAndPassword, 
+    onAuthStateChanged, 
+    signOut 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { 
+    getFirestore, 
+    collection, 
+    doc, 
+    getDoc, 
+    getDocs, 
+    setDoc, 
+    addDoc, 
+    updateDoc, 
+    deleteDoc, 
+    query, 
+    orderBy, 
+    onSnapshot 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { 
+    getStorage, 
+    ref, 
+    uploadBytes, 
+    getDownloadURL 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+  // إعدادات Firebase الخاصة بك
+  const firebaseConfig = {
+    apiKey: "AIzaSyB7O7xrjJVgeslAGYoCZYnKqWG5s--FdkI",
+    authDomain: "choes-7f98c.firebaseapp.com",
+    projectId: "choes-7f98c",
+    storageBucket: "choes-7f98c.firebasestorage.app",
+    messagingSenderId: "149286991385",
+    appId: "1:149286991385:web:adee6beae7e3ad80c2dc88"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  // Global States
+  let currentAdmin = null;
+  let QuillEditors = {};
+  let productsCache = [];
+  let categoriesCache = [];
+  let ordersCache = [];
+  let designConfig = {};
+
+  // Toast Function
+  function showToast(msg, type = 'success') {
+    const box = document.getElementById('toastBox');
+    const t = document.createElement('div');
+    const bg = type === 'success' ? 'bg-green-600' : 'bg-red-600';
+    t.className = `toast ${bg} text-white text-xs px-4 py-3 rounded-xl shadow-lg flex items-center gap-2`;
+    t.innerHTML = `<span>${type === 'success' ? '✓' : '✕'}</span> <span>${msg}</span>`;
+    box.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  // Upload helper
+  async function uploadFile(file, path) {
+    const storageRef = ref(storage, `${path}/${Date.now()}_${file.name}`);
+    const snapshot = await uploadBytes(storageRef, file);
+    return await getDownloadURL(snapshot.ref);
+  }
+
+  // Initialize Quill Editors
+  function initQuill() {
+    QuillEditors.desc = new Quill('#editorDescription', { theme: 'snow' });
+    QuillEditors.about = new Quill('#editorAbout', { theme: 'snow' });
+    QuillEditors.terms = new Quill('#editorTerms', { theme: 'snow' });
+    QuillEditors.contact = new Quill('#editorContact', { theme: 'snow' });
+  }
+
+  // AUTH LOGIC
+  onAuthStateChanged(auth, async (user) => {
+    const loginScreen = document.getElementById('loginScreen');
+    const appRoot = document.getElementById('appRoot');
+    const connStatus = document.getElementById('connStatus');
+
+    if (user) {
+      currentAdmin = user;
+      document.getElementById('adminEmailLabel').innerText = user.email;
+      loginScreen.classList.add('hidden');
+      appRoot.classList.remove('hidden');
+      connStatus.innerText = 'متصل متزامن';
+      connStatus.className = 'text-xs text-green-500 font-semibold';
+      
+      initQuill();
+      loadAllData();
+    } else {
+      currentAdmin = null;
+      loginScreen.classList.remove('hidden');
+      appRoot.classList.add('hidden');
+    }
+  });
+
+  document.getElementById('loginBtn').addEventListener('click', async () => {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPassword').value.trim();
+    const err = document.getElementById('loginError');
+    const btnText = document.getElementById('loginBtnText');
+
+    if (!email || !pass) {
+      err.innerText = 'الرجاء إدخال البريد وكلمة السر';
+      err.classList.remove('hidden');
+      return;
+    }
+
+    err.classList.add('hidden');
+    btnText.innerHTML = '<div class="spinner border-white"></div>';
+
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch (e) {
+      err.innerText = 'بيانات الدخول غير صحيحة';
+      err.classList.remove('hidden');
+    } finally {
+      btnText.innerText = 'تسجيل الدخول';
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    signOut(auth);
+  });
+
+  // TABS NAVIGATION
+  const navBtns = document.querySelectorAll('.nav-item, .nav-item-mobile');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  navBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.getAttribute('data-tab');
+      navBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      tabContents.forEach(tc => {
+        if (tc.id === `tab-${target}`) {
+          tc.classList.add('active');
+        } else {
+          tc.classList.remove('active');
+        }
+      });
+    });
+  });
+
+  // FETCH ALL DATA
+  function loadAllData() {
+    listenToOrders();
+    listenToProducts();
+    listenToCategories();
+    loadDesignAndSettings();
+  }
+
+  // ORDERS LISTEN
+  function listenToOrders() {
+    const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+    onSnapshot(q, (snapshot) => {
+      ordersCache = [];
+      snapshot.forEach(docSnap => {
+        ordersCache.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      renderDashboardStats();
+      renderLatestOrders();
+      renderOrdersTable();
+    });
+  }
+
+  // PRODUCTS LISTEN
+  function listenToProducts() {
     const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
     onSnapshot(q, (snapshot) => {
       productsCache = [];
@@ -654,6 +829,7 @@
       populateCategoryDropdown();
     });
   }
+
       // DASHBOARD & STATS
   function renderDashboardStats() {
     const filter = document.getElementById('dashFilter').value;
