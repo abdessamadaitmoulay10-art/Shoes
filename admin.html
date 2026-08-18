@@ -47,7 +47,7 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-<!-- ===================== LOGIN SCREEN ===================== -->
+<!-- LOGIN SCREEN -->
 <div id="loginScreen" class="fixed inset-0 bg-gray-50 z-[200] flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 w-full max-w-sm">
     <div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">S</div>
@@ -71,11 +71,9 @@
 </div>
 
 <div id="appRoot" class="hidden">
-
 <div id="toastBox" class="fixed top-4 left-4 z-[100] flex flex-col gap-2"></div>
 
 <div class="flex min-h-screen">
-
   <!-- Sidebar -->
   <aside class="w-64 bg-white border-l border-gray-200 flex-shrink-0 hidden md:flex flex-col">
     <div class="p-5 border-b border-gray-100 flex items-center gap-2">
@@ -111,7 +109,7 @@
     </div>
   </aside>
 
-  <!-- Mobile top bar -->
+  <!-- Mobile nav -->
   <div class="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 flex justify-around py-2 z-50">
     <button data-tab="dashboard" class="nav-item-mobile flex flex-col items-center text-xs text-gray-500 px-2">📊<span>الرئيسية</span></button>
     <button data-tab="orders" class="nav-item-mobile flex flex-col items-center text-xs text-gray-500 px-2">📦<span>الطلبات</span></button>
@@ -121,10 +119,9 @@
     <button data-tab="settings" class="nav-item-mobile flex flex-col items-center text-xs text-gray-500 px-2">⚙️<span>إعدادات</span></button>
   </div>
 
-  <!-- Main -->
   <main class="flex-1 p-4 md:p-8 pb-24 md:pb-8 overflow-y-auto">
 
-    <!-- ===================== DASHBOARD ===================== -->
+    <!-- DASHBOARD -->
     <section id="tab-dashboard" class="tab-content active">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h2 class="text-2xl font-bold">لوحة القيادة</h2>
@@ -176,7 +173,7 @@
       </div>
     </section>
 
-    <!-- ===================== ORDERS ===================== -->
+    <!-- ORDERS -->
     <section id="tab-orders" class="tab-content">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h2 class="text-2xl font-bold">إدارة الطلبات</h2>
@@ -211,7 +208,7 @@
       </div>
     </section>
 
-    <!-- ===================== PRODUCTS ===================== -->
+    <!-- PRODUCTS -->
     <section id="tab-products" class="tab-content">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h2 class="text-2xl font-bold">إدارة المنتجات</h2>
@@ -220,7 +217,7 @@
       <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
     </section>
 
-    <!-- ===================== CATEGORIES ===================== -->
+    <!-- CATEGORIES -->
     <section id="tab-categories" class="tab-content">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h2 class="text-2xl font-bold">إدارة التصنيفات</h2>
@@ -240,13 +237,11 @@
         </div>
       </div>
       <div id="categoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
-    </section>
-
-    <!-- ===================== DESIGN ===================== -->
+      </section>
+      <!-- DESIGN -->
     <section id="tab-design" class="tab-content space-y-6">
       <h2 class="text-2xl font-bold mb-2">تخصيص تصميم المتجر</h2>
 
-      <!-- Top bar -->
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
         <h3 class="font-bold mb-4">شريط الإعلانات العلوي</h3>
         <div class="grid sm:grid-cols-3 gap-4">
@@ -265,7 +260,6 @@
         </label>
       </div>
 
-      <!-- Logo -->
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
         <h3 class="font-bold mb-4">شعار المتجر (Logo)</h3>
         <div class="flex items-center gap-4">
@@ -274,14 +268,12 @@
         </div>
       </div>
 
-      <!-- Hero slider -->
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
         <h3 class="font-bold mb-4">صور البانر الإعلاني (Hero Slider)</h3>
         <input id="heroInput" type="file" accept="image/*" multiple class="text-sm mb-4">
         <div id="heroPreviewGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
       </div>
 
-      <!-- Footer -->
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
         <h3 class="font-bold mb-4">إعدادات التذييل (Footer)</h3>
         <div class="mb-4">
@@ -299,19 +291,19 @@
         <div class="grid sm:grid-cols-2 gap-4 mt-6">
           <div>
             <label class="block text-xs text-gray-400 mb-1">فيسبوك</label>
-            <input id="socialFacebook" type="text" class="border border-gray-200 rounded-lg px-3 py-2 text-sm w-full" placeholder="https://facebook.com/...">
+            <input id="socialFacebook" type="text" class="border border-gray-200 rounded-lg px-3 py-2 text-sm w-full">
           </div>
           <div>
             <label class="block text-xs text-gray-400 mb-1">إنستغرام</label>
-            <input id="socialInstagram" type="text" class="border border-gray-200 rounded-lg px-3 py-2 text-sm w-full" placeholder="https://instagram.com/...">
+            <input id="socialInstagram" type="text" class="border border-gray-200 rounded-lg px-3 py-2 text-sm w-full">
           </div>
           <div>
             <label class="block text-xs text-gray-400 mb-1">تيك توك</label>
-            <input id="socialTiktok" type="text" class="border border-gray-200 rounded-lg px-3 py-2 text-sm w-full" placeholder="https://tiktok.com/...">
+            <input id="socialTiktok" type="text" class="border border-gray-200 rounded-lg px-3 py-2 text-sm w-full">
           </div>
           <div>
             <label class="block text-xs text-gray-400 mb-1">واتساب</label>
-            <input id="socialWhatsapp" type="text" class="border border-gray-200 rounded-lg px-3 py-2 text-sm w-full" placeholder="212600000000">
+            <input id="socialWhatsapp" type="text" class="border border-gray-200 rounded-lg px-3 py-2 text-sm w-full">
           </div>
         </div>
       </div>
@@ -319,7 +311,7 @@
       <button id="saveDesignBtn" class="bg-primary text-white px-6 py-3 rounded-lg text-sm hover:bg-primaryDark transition">حفظ إعدادات التصميم</button>
     </section>
 
-    <!-- ===================== GENERAL SETTINGS ===================== -->
+    <!-- GENERAL SETTINGS -->
     <section id="tab-settings" class="tab-content space-y-6">
       <h2 class="text-2xl font-bold mb-2">الإعدادات العامة</h2>
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 grid sm:grid-cols-2 gap-6">
@@ -347,7 +339,7 @@
   </main>
 </div>
 
-<!-- ===================== PRODUCT MODAL ===================== -->
+<!-- PRODUCT MODAL -->
 <div id="productModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
   <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
     <div class="flex justify-between items-center mb-4">
@@ -401,9 +393,8 @@
   </div>
 </div>
 
-</div><!-- /#appRoot -->
-
-<!-- ===================== FIREBASE + APP LOGIC ===================== -->
+              </div>
+<!-- FIREBASE + APP LOGIC -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -413,31 +404,28 @@ import {
   getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
   onSnapshot, query, orderBy, serverTimestamp, getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import {
-  getStorage, ref, uploadBytes, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-// ====== ضع بيانات مشروعك في Firebase هنا (نفس الإعدادات يجب استخدامها في index.html) ======
-// === كود مفتاح ImgBB ودالة الرفع ===
+// ====== دالة رفع الصور المباشرة لـ ImgBB ======
 const imgbbApiKey = "d7c956d3580e1a868961e9ef492d9c60";
 
-async function uploadImageToImgBB(file) {
-    const formData = new FormData();
-    formData.append('image', file);
-    try {
-        const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-        return data.success ? data.data.url : null;
-    } catch (err) {
-        console.error("خطأ في رفع الصورة:", err);
-        return null;
-    }
+async function uploadToImgBB(file) {
+  const formData = new FormData();
+  formData.append('image', file);
+  try {
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    return data.success ? data.data.url : null;
+  } catch (err) {
+    console.error("خطأ في الرفع:", err);
+    return null;
+  }
 }
 
-  const firebaseConfig = {
+// ====== بيانات مشروع Firebase ======
+const firebaseConfig = {
   apiKey: "AIzaSyB7O7xrjJVgeslAGYoCZYnKqWG5s--FdkI",
   authDomain: "choes-7f98c.firebaseapp.com",
   projectId: "choes-7f98c",
@@ -448,7 +436,6 @@ async function uploadImageToImgBB(file) {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const storage = getStorage(app);
 const auth = getAuth(app);
 
 document.getElementById('connStatus').textContent = 'جارِ التحقق...';
@@ -517,12 +504,6 @@ function toast(msg, type = 'success') {
   setTimeout(() => el.remove(), 3000);
 }
 
-async function uploadFile(file, path) {
-  const fileRef = ref(storage, `${path}/${Date.now()}_${file.name}`);
-  await uploadBytes(fileRef, file);
-  return await getDownloadURL(fileRef);
-}
-
 function formatDate(ts) {
   if (!ts) return '-';
   const d = ts.toDate ? ts.toDate() : new Date(ts);
@@ -550,12 +531,11 @@ document.querySelectorAll('[data-tab]').forEach(btn => {
   });
 });
 
-// ================== STATE ==================
 let allOrders = [];
 let allProducts = [];
 let allCategories = [];
 
-// ================== ORDERS (realtime) ==================
+// ================== ORDERS ==================
 onSnapshot(query(collection(db, 'orders'), orderBy('createdAt', 'desc')), snap => {
   allOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   renderDashboard();
@@ -637,7 +617,7 @@ document.getElementById('exportCsvBtn').addEventListener('click', () => {
   link.click();
 });
 
-// ================== CATEGORIES (realtime) ==================
+// ================== CATEGORIES ==================
 onSnapshot(collection(db, 'categories'), snap => {
   allCategories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   renderCategories();
@@ -691,16 +671,16 @@ document.getElementById('addCatBtn').addEventListener('click', async () => {
   const btn = document.getElementById('addCatBtn');
   btn.disabled = true; btn.textContent = 'جارٍ الإضافة...';
   try {
-    if (file) imageUrl = await uploadFile(file, 'categories');
+    if (file) imageUrl = await uploadToImgBB(file);
     await addDoc(collection(db, 'categories'), { name, image: imageUrl, active: true, createdAt: serverTimestamp() });
     document.getElementById('catName').value = '';
     document.getElementById('catImage').value = '';
-    toast('تمت إضافة التصنيف');
+    toast('تمت إضافة التصنيف بنجاح');
   } catch (e) { toast('حدث خطأ: ' + e.message, 'error'); }
   btn.disabled = false; btn.textContent = 'إضافة';
 });
 
-// ================== PRODUCTS (realtime) ==================
+// ================== PRODUCTS ==================
 let descQuill, aboutQuill, termsQuill, contactQuill;
 window.addEventListener('DOMContentLoaded', () => {
   descQuill = new Quill('#editorDescription', { theme: 'snow' });
@@ -784,9 +764,14 @@ document.getElementById('cancelProductBtn').addEventListener('click', () => docu
 document.getElementById('pImages').addEventListener('change', async (e) => {
   const files = Array.from(e.target.files);
   for (const file of files) {
-    const url = await uploadFile(file, 'products');
-    uploadedProductImages.push(url);
-    renderProductImagePreview();
+    toast('جارٍ رفع الصورة...', 'success');
+    const url = await uploadToImgBB(file);
+    if (url) {
+      uploadedProductImages.push(url);
+      renderProductImagePreview();
+    } else {
+      toast('فشل رفع الصورة', 'error');
+    }
   }
 });
 
@@ -855,12 +840,12 @@ async function loadSettings() {
   document.getElementById('socialTiktok').value = s.footer?.social?.tiktok || '';
   document.getElementById('socialWhatsapp').value = s.footer?.social?.whatsapp || '';
 }
-setTimeout(loadSettings, 400); // wait for quill init
+setTimeout(loadSettings, 400);
 
 function renderHeroPreview() {
   document.getElementById('heroPreviewGrid').innerHTML = heroImages.map((url, i) => `
     <div class="relative">
-      <img src="${url}" class="w-full h-20 object-cover rounded-lg">
+            <img src="${url}" class="w-full h-20 object-cover rounded-lg">
       <button class="remove-hero absolute -top-2 -left-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs" data-i="${i}">×</button>
     </div>
   `).join('');
@@ -873,19 +858,30 @@ function renderHeroPreview() {
 document.getElementById('logoInput').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
-  const url = await uploadFile(file, 'design');
-  document.getElementById('logoPreview').src = url;
-  document.getElementById('logoPreview').classList.remove('hidden');
-  document.getElementById('logoPreview').dataset.url = url;
+  toast('جارٍ رفع اللوغو...', 'success');
+  const url = await uploadToImgBB(file);
+  if (url) {
+    document.getElementById('logoPreview').src = url;
+    document.getElementById('logoPreview').classList.remove('hidden');
+    document.getElementById('logoPreview').dataset.url = url;
+    toast('تم رفع اللوغو بنجاح');
+  } else {
+    toast('فشل رفع اللوغو', 'error');
+  }
 });
 
 document.getElementById('heroInput').addEventListener('change', async (e) => {
   const files = Array.from(e.target.files);
   for (const file of files) {
-    const url = await uploadFile(file, 'design');
-    heroImages.push(url);
+    toast('جارٍ رفع صورة البانر...', 'success');
+    const url = await uploadToImgBB(file);
+    if (url) {
+      heroImages.push(url);
+      renderHeroPreview();
+    } else {
+      toast('فشل رفع البانر', 'error');
+    }
   }
-  renderHeroPreview();
 });
 
 document.getElementById('saveDesignBtn').addEventListener('click', async () => {
