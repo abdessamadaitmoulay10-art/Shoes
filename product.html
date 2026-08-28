@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">المنتج</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { primary: '#1569C7', primaryDark: '#0F4E9C', primaryLight: '#E8F1FC' },
+        fontFamily: { sans: ['Cairo', 'sans-serif'] }
+      }
+    }
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  html, body { overflow-x: hidden; max-width: 100vw; }
+  body { font-family: 'Cairo', sans-serif; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+  .cart-drawer { transition: transform 0.3s ease; }
+  .toast { animation: slideIn 0.3s ease-out; }
+  @keyframes slideIn { from { transform: translateY(-20px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+
+  /* ==========================================================
+     🎨 ألوان المتجر الافتراضية — عدّل القيم هنا مباشرة إلا بغيتي
+     تبدل الألوان من الكود بدل لوحة التحكم. هاد القيم كتنبدل
+     تلقائياً من طرف لوحة التحكم إلا حطيتي ألوان من "تصميم المتجر".
+     ========================================================== */
+  :root {
+    --color-heading:      #1569C7;  /* لون العناوين */
+    --color-button:       #1569C7;  /* لون الأزرار */
+    --color-price:        #1569C7;  /* لون السعر الحالي */
+    --color-old-price:    #9CA3AF;  /* لون السعر القديم (المشطوب) */
+    --color-search-icon:  #000000;  /* لون أيقونة البحث */
+    --color-cart-icon:    #000000;  /* لون أيقونة السلة */
+    --color-footer-bg:    #111827;  /* لون خلفية التذييل (Footer) */
+    --color-footer-text:  #d1d5db;  /* لون نص التذييل (Footer) */
+  }
+  .theme-heading { color: var(--color-heading); }
+  .theme-btn { background-color: var(--color-button) !important; }
+  .theme-btn-outline { border-color: var(--color-button) !important; color: var(--color-button) !important; }
+  .theme-price { color: var(--color-price); }
+  .theme-old-price { color: var(--color-old-price); }
+  .variant-opt.selected { background-color: var(--color-button); color: #fff; border-color: var(--color-button); }
+  .theme-footer { background-color: var(--color-footer-bg); color: var(--color-footer-text); }
+  .theme-footer h4 { color: var(--color-footer-text); }
+  .theme-footer .theme-footer-border { border-color: color-mix(in srgb, var(--color-footer-text) 25%, transparent); }
+
+  /* ==========================================================
+     منع ظهور السلة لجزء من الثانية عند تحميل الصفحة (قبل ما يخدم Tailwind)
+     ========================================================== */
+  .translate-x-full { transform: translateX(100%); }
+  [class~="hidden"] { display: none; }
+</style>
+</head>
+<body class="bg-white text-gray-800">
+
+<div id="toastBox" class="fixed top-4 z-[100] flex flex-col gap-2 start-4"></div>
+
+<!-- ============ TOP ANNOUNCEMENT BAR ============ -->
+<div id="topbar" class="hidden text-center text-sm py-2 text-white"></div>
+
+<!-- ============ HEADER ============ -->
+<header class="border-b border-gray-100 sticky top-0 bg-white/95 backdrop-blur z-40">
+  <div class="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
+    <a href="index.html" class="flex items-center gap-2 text-sm text-gray-500">
+      <span>&#8594;</span><span data-i18n="backToStore">العودة للمتجر</span>
+    </a>
+    <a href="index.html" id="logoLink" class="flex items-center">
+      <img id="logoImg" src="" class="h-10 hidden">
+      <span id="logoText" class="font-bold text-xl theme-heading">المتجر</span>
+    </a>
+    <button id="cartBtn" class="relative text-xl" style="color:var(--color-cart-icon,#000000)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+      <span id="cartCount" class="absolute -top-2 -left-2 theme-btn text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- ============ PRODUCT ============ -->
+<main class="max-w-5xl mx-auto px-4 py-8">
+  <div id="loadingBox" class="text-center text-gray-400 py-20" data-i18n="loading">جارٍ التحميل...</div>
+  <div id="notFoundBox" class="hidden text-center text-gray-400 py-20" data-i18n="productNotFound">لم يتم العثور على المنتج</div>
+
+  <div id="productContent" class="hidden grid sm:grid-cols-2 gap-8">
+    <div>
+      <img id="mainImage" src="" class="w-full aspect-square object-cover rounded-xl mb-3 bg-gray-50">
+      <div id="thumbsRow" class="flex gap-2 overflow-x-auto"></div>
+    </div>
+    <div>
+      <h1 id="productName" class="text-2xl font-bold mb-2 theme-heading"></h1>
+      <div class="flex items-center gap-2 mb-2">
+        <span id="productPrice" class="theme-price font-bold text-xl"></span>
+        <span id="productOldPrice" class="theme-old-price line-through text-sm hidden"></span>
+      </div>
+      <p id="stockBadge" class="text-xs mb-4 hidden"></p>
+
+      <div id="variantGroups" class="space-y-4 mb-4"></div>
+
+      <div id="productDescription" class="text-sm text-gray-600 leading-6 my-4"></div>
+
+      <div class="space-y-2">
+        <button id="addToCartBtn" class="w-full theme-btn text-white py-3 rounded-lg font-semibold disabled:opacity-50" data-i18n="addToCart">أضف إلى السلة</button>
+        <button id="buyNowBtn" class="w-full bg-transparent border-2 theme-btn-outline py-3 rounded-lg font-semibold disabled:opacity-50" data-i18n="buyNow">اطلب الآن</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="theme-footer mt-12">
+  <div class="max-w-7xl mx-auto px-4 py-10 grid sm:grid-cols-3 gap-8">
+    <div id="about">
+      <button class="footer-accordion-btn font-bold mb-3 flex items-center justify-between w-full" data-target="footerAbout">
+        <span data-i18n="about">من نحن</span>
+        <span class="footer-accordion-icon transition-transform">▾</span>
+      </button>
+      <div id="footerAbout" class="text-sm leading-6 hidden"></div>
+    </div>
+    <div id="terms">
+      <button class="footer-accordion-btn font-bold mb-3 flex items-center justify-between w-full" data-target="footerTerms">
+        <span data-i18n="terms">الشروط والأحكام</span>
+        <span class="footer-accordion-icon transition-transform">▾</span>
+      </button>
+      <div id="footerTerms" class="text-sm leading-6 hidden"></div>
+    </div>
+    <div id="contact">
+      <h4 class="font-bold mb-3" data-i18n="contact">التواصل معنا</h4>
+      <div id="footerContact" class="text-sm leading-6 mb-3"></div>
+      <div class="flex gap-3">
+        <a id="socialFacebook" href="#" target="_blank" class="hidden hover:opacity-75">Facebook</a>
+        <a id="socialInstagram" href="#" target="_blank" class="hidden hover:opacity-75">Instagram</a>
+        <a id="socialTiktok" href="#" target="_blank" class="hidden hover:opacity-75">TikTok</a>
+        <a id="socialWhatsapp" href="#" target="_blank" class="hidden hover:opacity-75">WhatsApp</a>
+      </div>
+    </div>
+  </div>
+  <div class="theme-footer-border text-center text-xs opacity-70 border-t py-4" data-i18n="rights">جميع الحقوق محفوظة</div>
+</footer>
+
+<!-- ============ CART DRAWER ============ -->
+<div id="cartOverlay" class="fixed inset-0 bg-black/40 z-50 hidden"></div>
+<div id="cartDrawer" class="cart-drawer fixed top-0 bottom-0 right-0 w-full sm:w-96 max-w-[100vw] bg-white z-50 translate-x-full flex flex-col">
+  <div class="flex items-center justify-between p-4 border-b border-gray-100">
+    <h3 class="font-bold" data-i18n="yourCart">سلة التسوق</h3>
+    <button id="closeCartBtn" class="text-2xl">&times;</button>
+  </div>
+  <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
+  <div class="border-t border-gray-100 p-4">
+    <div id="cartTotals" class="space-y-1 mb-2"></div>
+    <div class="flex justify-between font-bold mb-4 pt-2 border-t border-gray-100">
+      <span data-i18n="total">الإجمالي</span>
+      <span id="cartTotal">0</span>
+    </div>
+    <button id="checkoutBtn" class="w-full theme-btn text-white py-3 rounded-lg font-semibold" data-i18n="checkout">إتمام الطلب</button>
+  </div>
+</div>
+
+<!-- ============ CHECKOUT MODAL ============ -->
+<div id="checkoutModal" class="fixed inset-0 bg-black/50 z-[60] hidden items-center justify-center p-4">
+  <div class="bg-white rounded-2xl w-full max-w-md p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-bold text-lg" data-i18n="completeOrder">إتمام الطلب (الدفع عند الاستلام)</h3>
+      <button id="closeCheckoutModal" class="text-2xl">&times;</button>
+    </div>
+    <div class="space-y-3">
+      <input id="custName" type="text" data-i18n-placeholder="fullName" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+      <input id="custPhone" type="tel" data-i18n-placeholder="phone" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+      <input id="custCity" type="text" data-i18n-placeholder="city" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
+      <textarea id="custAddress" data-i18n-placeholder="address" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" rows="2"></textarea>
+    </div>
+    <button id="confirmOrderBtn" class="w-full theme-btn text-white py-3 rounded-lg font-semibold mt-4" data-i18n="confirmOrder">تأكيد الطلب</button>
+  </div>
+</div>
+
+<!-- ============ FIREBASE + APP LOGIC ============ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB7O7xrjJVgeslAGYoCZYnKqWG5s--FdkI",
+  authDomain: "choes-7f98c.firebaseapp.com",
+  projectId: "choes-7f98c",
+  storageBucket: "choes-7f98c.firebasestorage.app",
+  messagingSenderId: "149286991385",
+  appId: "1:149286991385:web:adee6beae7e3ad80c2dc88"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ---------- i18n ----------
+const dict = {
+  ar: {
+    yourCart: 'سلة التسوق', total: 'الإجمالي', checkout: 'إتمام الطلب', completeOrder: 'إتمام الطلب (الدفع عند الاستلام)',
+    fullName: 'الاسم الكامل', phone: 'رقم الهاتف', city: 'المدينة', address: 'العنوان بالتفصيل',
+    confirmOrder: 'تأكيد الطلب', addToCart: 'أضف إلى السلة',
+    emptyCart: 'سلتك فارغة', orderSuccess: 'تم إرسال طلبك بنجاح! سنتواصل معك قريباً', fillFields: 'الرجاء ملء جميع الحقول',
+    size: 'المقاس', color: 'اللون', outOfStock: 'نفذت الكمية', subtotal: 'المجموع الفرعي', delivery: 'التوصيل',
+    onlyLeft: 'باقي غير', pieces: 'قطعة', backToStore: 'العودة للمتجر', loading: 'جارٍ التحميل...',
+    productNotFound: 'لم يتم العثور على المنتج', chooseSize: 'الرجاء اختيار المقاس', chooseColor: 'الرجاء اختيار اللون', pleaseChoose: 'الرجاء اختيار', buyNow: 'اطلب الآن',
+    about: 'من نحن', terms: 'الشروط والأحكام', contact: 'التواصل معنا', rights: 'جميع الحقوق محفوظة'
+  },
+  fr: {
+    yourCart: 'Votre panier', total: 'Total', checkout: 'Commander', completeOrder: 'Finaliser (Paiement à la livraison)',
+    fullName: 'Nom complet', phone: 'Téléphone', city: 'Ville', address: 'Adresse détaillée',
+    confirmOrder: 'Confirmer la commande', addToCart: 'Ajouter au panier',
+    emptyCart: 'Votre panier est vide', orderSuccess: 'Commande envoyée avec succès !', fillFields: 'Veuillez remplir tous les champs',
+    size: 'Taille', color: 'Couleur', outOfStock: 'Rupture de stock', subtotal: 'Sous-total', delivery: 'Livraison',
+    onlyLeft: 'Il ne reste que', pieces: 'pièce(s)', backToStore: 'Retour à la boutique', loading: 'Chargement...',
+    productNotFound: 'Produit introuvable', chooseSize: 'Veuillez choisir une taille', chooseColor: 'Veuillez choisir une couleur', pleaseChoose: 'Veuillez choisir', buyNow: 'Commander maintenant',
+    about: 'À propos', terms: 'Conditions générales', contact: 'Contact', rights: 'Tous droits réservés'
+  },
+  en: {
+    yourCart: 'Your Cart', total: 'Total', checkout: 'Checkout', completeOrder: 'Complete Order (Cash on Delivery)',
+    fullName: 'Full Name', phone: 'Phone Number', city: 'City', address: 'Detailed Address',
+    confirmOrder: 'Confirm Order', addToCart: 'Add to Cart',
+    emptyCart: 'Your cart is empty', orderSuccess: 'Your order was sent successfully!', fillFields: 'Please fill all fields',
+    size: 'Size', color: 'Color', outOfStock: 'Out of stock', subtotal: 'Subtotal', delivery: 'Delivery',
+    onlyLeft: 'Only', pieces: 'left', backToStore: 'Back to store', loading: 'Loading...',
+    productNotFound: 'Product not found', chooseSize: 'Please choose a size', chooseColor: 'Please choose a color', pleaseChoose: 'Please choose', buyNow: 'Buy Now',
+    about: 'About Us', terms: 'Terms & Conditions', contact: 'Contact Us', rights: 'All rights reserved'
+  }
+};
+let currentLang = 'ar';
+let currentCurrency = 'MAD';
+let deliveryFee = 0;
+const currencySymbols = { MAD: 'د.م.', USD: '$', SAR: 'ر.س', EUR: '€' };
+
+function t(key) { return dict[currentLang]?.[key] || dict.ar[key] || key; }
+function applyLang() {
+  document.getElementById('htmlRoot').lang = currentLang;
+  document.getElementById('htmlRoot').dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = t(el.dataset.i18nPlaceholder));
+}
+function formatPrice(v) { return `${(v || 0).toLocaleString('en-US')} ${currencySymbols[currentCurrency] || ''}`; }
+function toast(msg, type = 'success') {
+  const box = document.getElementById('toastBox');
+  const el = document.createElement('div');
+  el.className = `toast px-4 py-3 rounded-lg shadow-lg text-sm text-white ${type === 'success' ? 'bg-green-600' : 'bg-red-500'}`;
+  el.textContent = msg;
+  box.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ---------- CART (shared with index.html via localStorage) ----------
+function loadCartFromStorage() {
+  try { return JSON.parse(localStorage.getItem('storeCart') || '[]'); }
+  catch (e) { return []; }
+}
+function saveCartToStorage() { localStorage.setItem('storeCart', JSON.stringify(cart)); }
+let cart = loadCartFromStorage();
+
+function addToCart(product, variant) {
+  const existing = cart.find(i => i.productId === product.id &&
+    JSON.stringify(i.variant || {}) === JSON.stringify(variant || {}));
+  const stockLimit = typeof product.stock === 'number' ? product.stock : Infinity;
+  if (existing) {
+    if (existing.qty >= stockLimit) return toast(t('onlyLeft') + ' ' + stockLimit + ' ' + t('pieces'), 'error');
+    existing.qty++;
+  } else {
+    if (stockLimit <= 0) return toast(t('outOfStock'), 'error');
+    cart.push({
+      productId: product.id, name: product.name, price: product.price,
+      image: (product.images && product.images[0]) || '', qty: 1, variant, stock: (typeof product.stock === 'number' ? product.stock : null)
+    });
+  }
+  renderCart();
+  toast(t('addToCart') + ' ✓');
+}
+
+function renderCart() {
+  saveCartToStorage();
+  document.getElementById('cartCount').textContent = cart.reduce((s, i) => s + i.qty, 0);
+  const container = document.getElementById('cartItems');
+  container.innerHTML = cart.map((item, i) => `
+    <div class="flex gap-3 items-center border-b border-gray-50 pb-3">
+      <img src="${item.image || 'https://placehold.co/60x60?text=%20'}" class="w-14 h-14 object-cover rounded-lg">
+      <div class="flex-1">
+        <p class="text-sm font-medium">${item.name}</p>
+        <p class="text-xs text-gray-400">${Object.values(item.variant || {}).filter(Boolean).join(' / ')}</p>
+        <div class="flex items-center gap-2 mt-1">
+          <button class="qty-minus w-6 h-6 border border-gray-200 rounded" data-i="${i}">-</button>
+          <span class="text-sm">${item.qty}</span>
+          <button class="qty-plus w-6 h-6 border border-gray-200 rounded" data-i="${i}">+</button>
+        </div>
+      </div>
+      <div class="text-end">
+        <p class="text-sm font-bold theme-price">${formatPrice(item.price * item.qty)}</p>
+        <button class="remove-item text-xs text-red-500 mt-1" data-i="${i}">✕</button>
+      </div>
+    </div>
+  `).join('') || `<p class="text-gray-400 text-center py-10">${t('emptyCart')}</p>`;
+
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const fee = cart.length ? deliveryFee : 0;
+  const total = subtotal + fee;
+  document.getElementById('cartTotals').innerHTML = `
+    <div class="flex justify-between text-sm text-gray-500"><span>${t('subtotal')}</span><span>${formatPrice(subtotal)}</span></div>
+    <div class="flex justify-between text-sm text-gray-500"><span>${t('delivery')}</span><span>${formatPrice(fee)}</span></div>
+  `;
+  document.getElementById('cartTotal').textContent = formatPrice(total);
+
+  document.querySelectorAll('.qty-plus').forEach(b => b.addEventListener('click', () => {
+    const item = cart[b.dataset.i];
+    const stockLimit = typeof item.stock === 'number' ? item.stock : Infinity;
+    if (item.qty >= stockLimit) return toast(t('onlyLeft') + ' ' + stockLimit + ' ' + t('pieces'), 'error');
+    item.qty++; renderCart();
+  }));
+  document.querySelectorAll('.qty-minus').forEach(b => b.addEventListener('click', () => { const i = b.dataset.i; cart[i].qty = Math.max(1, cart[i].qty - 1); renderCart(); }));
+  document.querySelectorAll('.remove-item').forEach(b => b.addEventListener('click', () => { cart.splice(b.dataset.i, 1); renderCart(); }));
+}
+
+document.getElementById('cartBtn').addEventListener('click', () => {
+  document.getElementById('cartDrawer').classList.remove('translate-x-full');
+  document.getElementById('cartOverlay').classList.remove('hidden');
+});
+function closeCart() {
+  document.getElementById('cartDrawer').classList.add('translate-x-full');
+  document.getElementById('cartOverlay').classList.add('hidden');
+}
+document.getElementById('closeCartBtn').addEventListener('click', closeCart);
+document.getElementById('cartOverlay').addEventListener('click', closeCart);
+
+// ---------- CHECKOUT ----------
+document.getElementById('checkoutBtn').addEventListener('click', () => {
+  if (!cart.length) return toast(t('emptyCart'), 'error');
+  document.getElementById('checkoutModal').classList.remove('hidden');
+  document.getElementById('checkoutModal').classList.add('flex');
+});
+document.getElementById('closeCheckoutModal').addEventListener('click', () => {
+  document.getElementById('checkoutModal').classList.add('hidden');
+});
+
+document.getElementById('confirmOrderBtn').addEventListener('click', async () => {
+  const fullName = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const city = document.getElementById('custCity').value.trim();
+  const address = document.getElementById('custAddress').value.trim();
+
+  if (!fullName || !phone || !city || !address) return toast(t('fillFields'), 'error');
+
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const total = subtotal + deliveryFee;
+  const orderNumber = Date.now().toString().slice(-8);
+  const btn = document.getElementById('confirmOrderBtn');
+  btn.disabled = true;
+
+  try {
+    await addDoc(collection(db, 'orders'), {
+      orderNumber,
+      customer: { fullName, phone, city, address },
+      items: cart,
+      subtotal, deliveryFee, total,
+      status: 'pending',
+      createdAt: serverTimestamp()
+    });
+    toast(t('orderSuccess'));
+    cart = [];
+    localStorage.removeItem('storeCart');
+    renderCart();
+    document.getElementById('checkoutModal').classList.add('hidden');
+    closeCart();
+    ['custName', 'custPhone', 'custCity', 'custAddress'].forEach(id => document.getElementById(id).value = '');
+  } catch (e) {
+    toast('Error: ' + e.message, 'error');
+  }
+  btn.disabled = false;
+});
+
+// ---------- SETTINGS (logo, lang, currency, delivery fee, theme colors) ----------
+function applySettings(s) {
+  currentLang = s.language || 'ar';
+  currentCurrency = s.currency || 'MAD';
+  deliveryFee = Number(s.deliveryFee) || 0;
+  applyLang();
+  applyThemeColors(s.colors || {});
+  renderCart();
+  renderProduct();
+
+  // topbar
+  const topbar = document.getElementById('topbar');
+  if (s.topbar?.active && s.topbar?.text) {
+    topbar.textContent = s.topbar.text;
+    topbar.style.backgroundColor = s.topbar.color || '#1569C7';
+    topbar.style.color = s.topbar.textColor || '#FFFFFF';
+    topbar.classList.remove('hidden');
+  } else {
+    topbar.classList.add('hidden');
+  }
+
+  // footer
+  document.getElementById('footerAbout').innerHTML = s.footer?.about || '';
+  document.getElementById('footerTerms').innerHTML = s.footer?.terms || '';
+  document.getElementById('footerContact').innerHTML = s.footer?.contact || '';
+  const social = s.footer?.social || {};
+  setupSocialLink('socialFacebook', social.facebook);
+  setupSocialLink('socialInstagram', social.instagram);
+  setupSocialLink('socialTiktok', social.tiktok);
+  if (social.whatsapp) {
+    const a = document.getElementById('socialWhatsapp');
+    a.href = `https://wa.me/${social.whatsapp}`;
+    a.classList.remove('hidden');
+  }
+
+  if (s.logo) {
+    document.getElementById('logoImg').src = s.logo;
+    document.getElementById('logoImg').classList.remove('hidden');
+    document.getElementById('logoText').classList.add('hidden');
+  }
+
+  // كنحفظو الإعدادات محلياً باش نطبقوها فوراً فـ المرة الجاية (يمنع ظهور
+  // التصميم الافتراضي لجزء من الثانية وقت تحديث الصفحة، قبل ما توصل بيانات Firebase)
+  try { localStorage.setItem('storeSettingsCache', JSON.stringify(s)); } catch (e) {}
+}
+
+onSnapshot(doc(db, 'settings', 'store'), snap => {
+  if (!snap.exists()) return;
+  applySettings(snap.data());
+});
+
+function setupSocialLink(id, url) {
+  if (!url) return;
+  const a = document.getElementById(id);
+  a.href = url;
+  a.classList.remove('hidden');
+}
+
+function applyThemeColors(colors) {
+  const root = document.documentElement.style;
+  root.setProperty('--color-heading', colors.heading || '#1569C7');
+  root.setProperty('--color-button', colors.button || '#1569C7');
+  root.setProperty('--color-price', colors.price || '#1569C7');
+  root.setProperty('--color-old-price', colors.oldPrice || '#9CA3AF');
+  root.setProperty('--color-search-icon', colors.searchIcon || '#000000');
+  root.setProperty('--color-cart-icon', colors.cartIcon || '#000000');
+  root.setProperty('--color-footer-bg', colors.footerBg || '#111827');
+  root.setProperty('--color-footer-text', colors.footerText || '#d1d5db');
+}
+
+// ---------- LOAD PRODUCT ----------
+const params = new URLSearchParams(location.search);
+const productId = params.get('id');
+let product = null;
+let selectedVariant = {}; // { [groupName]: value }
+
+async function loadProduct() {
+  if (!productId) { showNotFound(); return; }
+  try {
+    const snap = await getDoc(doc(db, 'products', productId));
+    if (!snap.exists()) { showNotFound(); return; }
+    product = { id: snap.id, ...snap.data() };
+    renderProduct();
+  } catch (e) {
+    showNotFound();
+  }
+}
+function showNotFound() {
+  document.getElementById('loadingBox').classList.add('hidden');
+  document.getElementById('notFoundBox').classList.remove('hidden');
+}
+
+// Returns [{name, options:[{value, price?, oldPrice?}]}], supporting the new flexible
+// format (product.variantGroups) and the old fixed format (product.variants.sizes/colors)
+function getVariantGroups(p) {
+  if (Array.isArray(p.variantGroups) && p.variantGroups.length) {
+    return p.variantGroups
+      .map(g => ({
+        name: g.name,
+        options: Array.isArray(g.options) ? g.options : (g.values || []).map(v => ({ value: v }))
+      }))
+      .filter(g => g.name && g.options.length);
+  }
+  const groups = [];
+  if (p.variants?.sizes?.length) groups.push({ name: t('size'), options: p.variants.sizes.map(v => ({ value: v })) });
+  if (p.variants?.colors?.length) groups.push({ name: t('color'), options: p.variants.colors.map(v => ({ value: v })) });
+  return groups;
+}
+
+// كتحسب السعر الحالي بناءً على المتغيرات المختارة (إلا كان لقيمة معينة سعر خاص)
+function computeEffectivePrice() {
+  let price = product.price;
+  let oldPrice = product.oldPrice || null;
+  const groups = getVariantGroups(product);
+  groups.forEach(g => {
+    const selectedValue = selectedVariant[g.name];
+    if (!selectedValue) return;
+    const opt = g.options.find(o => o.value === selectedValue);
+    if (opt && opt.price !== undefined && opt.price !== null && opt.price !== '') {
+      price = Number(opt.price);
+      oldPrice = (opt.oldPrice !== undefined && opt.oldPrice !== null && opt.oldPrice !== '') ? Number(opt.oldPrice) : null;
+    }
+  });
+  return { price, oldPrice };
+}
+
+function updateDisplayedPrice() {
+  const { price, oldPrice } = computeEffectivePrice();
+  document.getElementById('productPrice').textContent = formatPrice(price);
+  const oldPriceEl = document.getElementById('productOldPrice');
+  if (oldPrice) {
+    oldPriceEl.textContent = formatPrice(oldPrice);
+    oldPriceEl.classList.remove('hidden');
+  } else {
+    oldPriceEl.classList.add('hidden');
+  }
+}
+
+function renderProduct() {
+  if (!product) return;
+  document.getElementById('loadingBox').classList.add('hidden');
+  document.getElementById('productContent').classList.remove('hidden');
+  document.getElementById('pageTitle').textContent = product.name;
+
+  const images = product.images && product.images.length ? product.images : ['https://placehold.co/500x500?text=%20'];
+  document.getElementById('mainImage').src = images[0];
+  document.getElementById('thumbsRow').innerHTML = images.map(img =>
+    `<img src="${img}" class="thumb w-14 h-14 object-cover rounded-lg cursor-pointer border border-gray-200 flex-shrink-0">`
+  ).join('');
+  document.querySelectorAll('.thumb').forEach(th => th.addEventListener('click', () => {
+    document.getElementById('mainImage').src = th.src;
+  }));
+
+  document.getElementById('productName').textContent = product.name;
+  updateDisplayedPrice();
+
+  const stockBadge = document.getElementById('stockBadge');
+  const addBtn = document.getElementById('addToCartBtn');
+  const buyBtn = document.getElementById('buyNowBtn');
+  if (typeof product.stock === 'number') {
+    if (product.stock <= 0) {
+      stockBadge.textContent = t('outOfStock');
+      stockBadge.className = 'text-xs mb-4 text-red-500 font-medium';
+      addBtn.disabled = true;
+      buyBtn.disabled = true;
+    } else {
+      stockBadge.textContent = `${t('onlyLeft')} ${product.stock} ${t('pieces')}`;
+      stockBadge.className = 'text-xs mb-4 text-amber-600 font-medium';
+      addBtn.disabled = false;
+      buyBtn.disabled = false;
+    }
+    stockBadge.classList.remove('hidden');
+  } else {
+    stockBadge.classList.add('hidden');
+    addBtn.disabled = false;
+    buyBtn.disabled = false;
+  }
+
+  selectedVariant = {};
+  const groups = getVariantGroups(product);
+  const container = document.getElementById('variantGroups');
+  container.innerHTML = groups.map((g, gi) => `
+    <div>
+      <p class="text-xs text-gray-400 mb-1">${g.name}</p>
+      <div class="flex gap-2 flex-wrap">
+        ${g.options.map(o => `<button class="variant-opt border border-gray-200 rounded-lg px-3 py-1 text-sm" data-group="${gi}" data-v="${o.value}">${o.value}</button>`).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.variant-opt').forEach(b => b.addEventListener('click', () => {
+    const gi = b.dataset.group;
+    const groupName = groups[gi].name;
+    const alreadySelected = b.classList.contains('selected');
+    container.querySelectorAll(`.variant-opt[data-group="${gi}"]`).forEach(x => x.classList.remove('selected'));
+    if (alreadySelected) {
+      delete selectedVariant[groupName];
+    } else {
+      b.classList.add('selected');
+      selectedVariant[groupName] = b.dataset.v;
+    }
+    updateDisplayedPrice();
+  }));
+
+  document.getElementById('productDescription').innerHTML = product.description || '';
+}
+
+function validateVariantSelection() {
+  const groups = getVariantGroups(product);
+  for (const g of groups) {
+    if (!selectedVariant[g.name]) { toast(`${t('pleaseChoose')} ${g.name}`, 'error'); return false; }
+  }
+  return true;
+}
+
+document.getElementById('addToCartBtn').addEventListener('click', () => {
+  if (!product) return;
+  if (!validateVariantSelection()) return;
+  const { price } = computeEffectivePrice();
+  addToCart({ ...product, price }, { ...selectedVariant });
+});
+
+document.getElementById('buyNowBtn').addEventListener('click', () => {
+  if (!product) return;
+  if (!validateVariantSelection()) return;
+  const { price } = computeEffectivePrice();
+  addToCart({ ...product, price }, { ...selectedVariant });
+  document.getElementById('checkoutModal').classList.remove('hidden');
+  document.getElementById('checkoutModal').classList.add('flex');
+});
+
+applyLang();
+renderCart();
+loadProduct();
+
+// ---------- أكورديون التذييل (من نحن / الشروط والأحكام) ----------
+document.querySelectorAll('.footer-accordion-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const content = document.getElementById(btn.dataset.target);
+    const icon = btn.querySelector('.footer-accordion-icon');
+    content.classList.toggle('hidden');
+    icon.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+  });
+});
+
+// تطبيق فوري للإعدادات المحفوظة محلياً من آخر زيارة (يمنع ظهور التصميم
+// الافتراضي لجزء من الثانية عند تحميل الصفحة، قبل ما توصل بيانات Firebase)
+try {
+  const cachedSettings = localStorage.getItem('storeSettingsCache');
+  if (cachedSettings) applySettings(JSON.parse(cachedSettings));
+} catch (e) {}
+</script>
+</body>
+</html>
